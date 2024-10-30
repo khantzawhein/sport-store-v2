@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Sport Store APIs')
     .setDescription('Store Store V2 Backend APIs')

@@ -5,6 +5,7 @@ import { PrismaService } from '../../prisma.service';
 import { compareSync, hashSync } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Customers } from '@prisma/client';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,10 +27,7 @@ export class AuthService {
 
     const token = this.generateToken(customer);
 
-    return {
-      customer,
-      token,
-    };
+    return this.mapResponseDto(customer, token);
   }
 
   async login(email: string, password: string) {
@@ -40,15 +38,11 @@ export class AuthService {
     });
 
     if (!customer || !compareSync(password, customer.password)) {
-      throw new HttpException('Invalid credentials', 401);
+      throw new HttpException('Invalid credentials', 422);
     }
 
     const token = this.generateToken(customer);
-
-    return {
-      customer,
-      token,
-    };
+    return this.mapResponseDto(customer, token);
   }
 
   private generateToken(customer: Customers) {
@@ -62,5 +56,19 @@ export class AuthService {
         expiresIn: '7d',
       },
     );
+  }
+
+  private mapResponseDto(customer: Customers, token: string): LoginResponseDto {
+    const responseDto = new LoginResponseDto();
+    responseDto.token = token;
+    responseDto.customer = {
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+    };
+
+    return responseDto;
   }
 }

@@ -15,16 +15,15 @@ export class AuthController {
   @Post('login')
   async login(@Body() body: LoginDto, @Res() res: Response) {
     const { email, password } = body;
-    return res.status(200).json(await this.authService.login(email, password));
+    const result = await this.authService.login(email, password);
+
+    return res.status(200).json(result);
   }
 
   @UsePipes(new JoiValidationPipe(SignUpSchema))
   @Post('signup')
   async signup(@Body() data: SignupDto, @Res() res: Response) {
     const result = await this.authService.signup(data);
-    return res.status(200).json({
-      customer: result.customer,
-      token: result.token,
-    });
+    return res.status(200).json(result);
   }
 }

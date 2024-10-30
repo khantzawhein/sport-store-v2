@@ -4,4 +4,7 @@ export class ProductResponseDto {
   price: number;
   description: string;
   images: string[];
+  categories: string[];
+  discountPrice: number;
+  slug: string;
 }

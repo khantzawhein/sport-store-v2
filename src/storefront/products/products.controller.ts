@@ -71,6 +71,7 @@ export class ProductsController {
       };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.error(error);
       throw new NotFoundException('Product not found');
     }
   }

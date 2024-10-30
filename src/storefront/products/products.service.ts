@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { PaginatedProductsResponseDto } from './dto/product-response.dto';
 import { Category_Types } from '@prisma/client';
+import { ProductResponseDto } from '../home-page/dto/product-response.dto';
 
 @Injectable()
 export class ProductService {
@@ -13,13 +14,15 @@ export class ProductService {
   ) {}
 
   async getProductBySlug(slug: string) {
-    return this.prisma.products.findFirstOrThrow({
-      where: { slug },
-      include: {
-        product_images: true,
-        categories: true,
-      },
-    });
+    return this.mapProductToResponseDto(
+      await this.prisma.products.findFirstOrThrow({
+        where: { slug },
+        include: {
+          product_images: true,
+          categories: true,
+        },
+      }),
+    );
   }
 
   async getRelatedProducts(productSlug: string) {
@@ -70,12 +73,17 @@ export class ProductService {
         skip: (page - 1) * this.configService.get<number>('perPage'),
         include: {
           product_images: true,
+          categories: {
+            include: {
+              category: true,
+            },
+          },
         },
       }),
     ]);
-
+    const productDto = this.mapProductsToResponseDto(products);
     return {
-      products,
+      products: productDto,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(
@@ -125,7 +133,6 @@ export class ProductService {
         },
       }),
     ]);
-
     return {
       products,
       category,
@@ -156,5 +163,23 @@ export class ProductService {
 
   async getCategoryTypes(): Promise<Category_Types[]> {
     return this.prisma.category_Types.findMany();
+  }
+
+  mapProductsToResponseDto(products: unknown[]): ProductResponseDto[] {
+    return products.map((product) => this.mapProductToResponseDto(product));
+  }
+
+  mapProductToResponseDto(product: any): ProductResponseDto {
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      images: product.product_images?.map((image) => image.image_path) || [],
+      categories:
+        product.categories?.map((category) => category.category?.name) || [],
+      price: product.price,
+      discountPrice: product.promotional_price,
+      description: product.description,
+    };
   }
 }

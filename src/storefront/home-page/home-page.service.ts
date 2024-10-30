@@ -23,6 +23,15 @@ export class HomePageService {
             image_path: true,
           },
         },
+        categories: {
+          include: {
+            category: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -43,6 +52,15 @@ export class HomePageService {
             image_path: true,
           },
         },
+        categories: {
+          include: {
+            category: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -54,9 +72,11 @@ export class HomePageService {
       id: product.id,
       name: product.name,
       price: product.price,
+      discountPrice: product.promotional_price,
       description: product.description,
       images: product.product_images.map((img) => img.image_path),
-      // Add other relevant fields here
+      categories: product.categories.map((category) => category.category.name),
+      slug: product.slug,
     }));
   }
 }
