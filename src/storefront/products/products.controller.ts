@@ -42,13 +42,13 @@ export class ProductsController {
   @ApiParam({ name: 'slug', description: 'Category type slug' })
   async getCategoryByType(
     @Param('slug') typeSlug: string,
-  ): Promise<{ categorySlug: string }> {
+  ): Promise<{ name: string, slug: string }[]> {
     const categorySlug =
-      await this.productService.getCategorySlugByType(typeSlug);
+      await this.productService.getCategoriesByType(typeSlug);
     if (!categorySlug) {
       throw new NotFoundException('Category type not found');
     }
-    return { categorySlug };
+    return categorySlug;
   }
 
   @Get('types')

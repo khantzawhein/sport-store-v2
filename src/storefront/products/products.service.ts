@@ -147,18 +147,23 @@ export class ProductService {
     };
   }
 
-  async getCategorySlugByType(typeSlug: string): Promise<string | null> {
+  async getCategoriesByType(
+    typeSlug: string,
+  ): Promise<{ name: string; slug: string }[]> {
     const categoryType = await this.prisma.category_Types.findFirst({
       where: { slug: typeSlug },
       include: {
         categories: {
-          take: 1,
-          select: { slug: true },
+          select: { slug: true, name: true },
         },
       },
     });
 
-    return categoryType?.categories[0]?.slug ?? null;
+    return (
+      categoryType?.categories.map((category) => {
+        return { name: category.name, slug: category.slug }
+      }) ?? []
+    );
   }
 
   async getCategoryTypes(): Promise<Category_Types[]> {
